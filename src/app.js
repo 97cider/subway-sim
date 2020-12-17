@@ -1,11 +1,14 @@
 import * as THREE from "../node_modules/three/build/three.module.js";
+import { Sky } from "./scripts/sky.js";
  
 let camera, scene, renderer;
-let geometry, material, mesh, sceneOrtho, cameraOrtho;
+let geometry, material, mesh, sky, sceneOrtho, cameraOrtho;
 let subwaySprite, railingSprite;
 
 let bounceDirection = true;
 let isBouncing = false;
+let bounceCoefficient = 0;
+let sun = new THREE.Vector3();
 
 let mouse = new THREE.Vector2();
 
@@ -24,17 +27,20 @@ function init() {
     let height = window.innerHeight;
     
     camera = new THREE.PerspectiveCamera( 70, width / height, 0.01, 10 );
-    camera.position.z = 1500;
+    camera.position.z = 1;
 
     cameraOrtho = new THREE.OrthographicCamera( -width / 2, width / 2, height / 2, -height / 2, 1, 10);
     cameraOrtho.position.z = 10;
  
     scene = new THREE.Scene();
+    scene.fog = new THREE.Fog( 0x000000, 1500, 2100 );
+
     sceneOrtho = new THREE.Scene();
 
-    renderer = new THREE.WebGLRenderer( { antialias: true } );
+    renderer = new THREE.WebGLRenderer();
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.autoClear = false;
 
     let textureLoader = new THREE.TextureLoader();
     let subwayTexture = textureLoader.load("../public/images/overlay-bg.png");
@@ -61,10 +67,29 @@ function init() {
     material = new THREE.MeshNormalMaterial();
  
     mesh = new THREE.Mesh( geometry, material );
-    scene.add( mesh );
+    //scene.add( mesh );
+
+    initSky();
  
     document.body.appendChild( renderer.domElement );
  
+}
+
+function initSky() {
+    sky = new Sky();
+    sky.scale.setScalar( 10 );
+    scene.add( sky );
+
+    const uniforms = sky.material.uniforms;
+    
+    const theta = Math.PI * ( 0.62 - 0.5 );
+    const phi = 2 * Math.PI * ( 0.2254 - 0.5 );
+
+    sun.x = Math.cos( phi );
+    sun.y = Math.sin( phi ) * Math.sin( theta );
+    sun.z = Math.sin( phi ) * Math.cos( theta );
+
+    uniforms[ "sunPosition" ].value.copy( sun );
 }
 
 function onDocumentMouseMove(event) {
@@ -98,18 +123,24 @@ function animate() {
     subwaySprite.position.x = mouse.x * backParallaxSensitivity;
     railingSprite.position.x = mouse.x * frontParallaxSensitivity;
 
-    if (Math.floor(Math.random() * 100) > 96) {
+    let bounceChance = Math.floor( Math.random() * 100 );
+
+    if ( bounceChance > 96 ) {
         isBouncing = true;
+        bounceCoefficient = bounceChance;
     }
 
-    if (isBouncing) {
-        animateOverlay(subwaySprite, 2);
-        animateOverlay(railingSprite, 2);
+    if ( isBouncing ) {
+        let bounceAmount = 2 * ( 2 * ( ( 100 - bounceCoefficient ) / 4 ) );
+        console.log(bounceAmount);
+        animateOverlay( subwaySprite, bounceAmount );
+        animateOverlay( railingSprite, bounceAmount );
     }
  
     mesh.rotation.x += 0.01;
     mesh.rotation.y += 0.02;
  
+    renderer.clear();
     renderer.render( scene, camera );
     renderer.clearDepth();
     renderer.render( sceneOrtho, cameraOrtho);
