@@ -1,0 +1,17 @@
+{
+  "name": "subway-sim",
+  "version": "1.0.0",
+  "description": "small procedural city viewed through a subway window",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "three": "^0.123.0"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.1"
+  }
+}
