@@ -4,10 +4,14 @@ let camera, scene, renderer;
 let geometry, material, mesh, sceneOrtho, cameraOrtho;
 let subwaySprite, railingSprite;
 
+let bounceDirection = true;
+let isBouncing = false;
+
 let mouse = new THREE.Vector2();
 
 const frontParallaxSensitivity = 20;
 const backParallaxSensitivity = 10;
+const bounceSpeed = 5;
  
 init();
 animate();
@@ -68,12 +72,40 @@ function onDocumentMouseMove(event) {
     mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 }
 
+function animateOverlay(sprite, amount) {
+    if (bounceDirection) {
+        sprite.position.y += amount * ( 1 / bounceSpeed );
+        if (sprite.position.y > amount) {
+            bounceDirection = false;
+        }
+    }
+    else {
+        if (sprite.position.y >= 0) {
+            sprite.position.y -= amount * ( 1 / bounceSpeed );
+            if(sprite.position.y <= 0) {
+                bounceDirection = true;
+                isBouncing = false;
+            }
+        }
+    }
+
+}
+
 function animate() {
  
     requestAnimationFrame( animate );
 
     subwaySprite.position.x = mouse.x * backParallaxSensitivity;
     railingSprite.position.x = mouse.x * frontParallaxSensitivity;
+
+    if (Math.floor(Math.random() * 100) > 96) {
+        isBouncing = true;
+    }
+
+    if (isBouncing) {
+        animateOverlay(subwaySprite, 2);
+        animateOverlay(railingSprite, 2);
+    }
  
     mesh.rotation.x += 0.01;
     mesh.rotation.y += 0.02;
