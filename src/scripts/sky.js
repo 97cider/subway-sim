@@ -22,6 +22,7 @@ Sky.prototype = Object.create( THREE.Mesh.prototype );
 Sky.SkyShader = {
     uniforms: {
         "sunPosition": { value: new THREE.Vector3() },
+        "resolution" : { value: new THREE.Vector2() }
     },
     vertexShader: SkyShaders.vertexShader,
     fragmentShader: SkyShaders.fragmentShader

@@ -90,6 +90,7 @@ function initSky() {
     sun.z = Math.sin( phi ) * Math.cos( theta );
 
     uniforms[ "sunPosition" ].value.copy( sun );
+    uniforms["resolution"].value = new THREE.Vector2( window.innerWidth, window.innerHeight );
 }
 
 function onDocumentMouseMove(event) {
@@ -132,7 +133,6 @@ function animate() {
 
     if ( isBouncing ) {
         let bounceAmount = 2 * ( 2 * ( ( 100 - bounceCoefficient ) / 4 ) );
-        console.log(bounceAmount);
         animateOverlay( subwaySprite, bounceAmount );
         animateOverlay( railingSprite, bounceAmount );
     }
